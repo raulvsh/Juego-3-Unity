@@ -6,8 +6,10 @@ public class PlayerControllerX : MonoBehaviour
 {
     public bool gameOver;
 
-    public float floatForce;
+    public float floatForce = 50;
     private float gravityModifier = 1.5f;
+    private float limiteSuperior = 13.0f;
+    private bool puedeSubirMas;
     private Rigidbody playerRb;
 
     public ParticleSystem explosionParticle;
@@ -16,6 +18,8 @@ public class PlayerControllerX : MonoBehaviour
     private AudioSource playerAudio;
     public AudioClip moneySound;
     public AudioClip explodeSound;
+    public AudioClip reboundSound;
+
 
 
     // Start is called before the first frame update
@@ -23,6 +27,7 @@ public class PlayerControllerX : MonoBehaviour
     {
         Physics.gravity *= gravityModifier;
         playerAudio = GetComponent<AudioSource>();
+        playerRb = GetComponent<Rigidbody>();
 
         // Apply a small upward force at the start of the game
         playerRb.AddForce(Vector3.up * 5, ForceMode.Impulse);
@@ -32,8 +37,9 @@ public class PlayerControllerX : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        puedeSubirMas = transform.position.y < limiteSuperior;
         // While space is pressed and player is low enough, float up
-        if (Input.GetKey(KeyCode.Space) && !gameOver)
+        if (Input.GetKey(KeyCode.Space) && !gameOver && puedeSubirMas)
         {
             playerRb.AddForce(Vector3.up * floatForce);
         }
@@ -59,7 +65,10 @@ public class PlayerControllerX : MonoBehaviour
             Destroy(other.gameObject);
 
         }
-
+        else if (other.gameObject.CompareTag("Suelo"))
+        {
+            playerRb.AddForce(Vector3.up * 10, ForceMode.Impulse);
+            playerAudio.PlayOneShot(reboundSound, 1.0f);
+        }
     }
-
 }
